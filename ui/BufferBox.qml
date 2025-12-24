@@ -18,8 +18,8 @@ Rectangle {
 
   // singals
   signal removeClicked
-  signal tagChanged(string newTag)
-  signal valueChanged(string newValue)
+  signal tagChanged
+  signal valueChanged
 
   RowLayout{
     anchors.fill: parent
@@ -45,8 +45,10 @@ Rectangle {
       background: Rectangle {
         color: "transparent"
       }
-      onTextChanged: {
-        console.debug("labeltext ", text)
+
+      onAccepted: {
+        box.tagText=text
+        box.tagChanged()
       }
     }
 
@@ -83,8 +85,9 @@ Rectangle {
         regularExpression: /^-?[0-9]*\.?[0-9]*$/
       }
 
-      onTextChanged: {
-        console.debug("labelvalue ", text)
+      onAccepted: {
+        box.valueText=text
+        box.valueChanged()
       }
     }
   }

@@ -5,9 +5,12 @@ import QtQuick.Layouts
 
 Item {
   id: dynItem
-  implicitWidth: 400
+  implicitWidth: parent.implicitWidth
   implicitHeight: bufferLayout.implicitHeight + 20
- 
+  required property string tagName
+  required property int tagKey
+  property var total: 0.
+
   ColumnLayout{
     id: bufferLayout
     anchors.fill: parent
@@ -20,7 +23,7 @@ Item {
 
       // Left: Buffers label
       Text {
-        text: "Buffers"
+        text: dynItem.tagName
         font.pixelSize: 13
         font.bold: true
         font.family: "Microsoft YaHei"
@@ -42,32 +45,19 @@ Item {
       Rectangle {
         id: addBtn
         Layout.preferredHeight: 36
-        Layout.preferredWidth: 120
+        Layout.preferredWidth: 36
         color: "#1a1a1a"
         radius: 6
         border.color: "#21be2b"
         border.width: 1
 
-        RowLayout {
-          anchors.fill: parent
-          anchors.margins: 8
-          spacing: 8
-
-          Text {
-            text: "+"
-            font.pixelSize: 18
-            font.bold: true
-            color: "#21be2b"
-            Layout.fillWidth: false
-          }
-
-          Text {
-            text: "Add"
-            font.pixelSize: 12
-            font.bold: true
-            color: "#ffffff"
-            Layout.fillWidth: true
-          }
+        Text {
+          anchors.centerIn: parent
+          text: "+"
+          font.pixelSize: 26
+          font.bold: true
+          color: "#21be2b"
+          Layout.fillWidth: false
         }
 
         MouseArea {
@@ -104,12 +94,12 @@ Item {
 
       // Right: Total count
       Text {
-        text: "Total: " + repeater.count
+        text: "Total: " + dynItem.total.toFixed(2)
         font.pixelSize: 12
         font.bold: true
         font.family: "Microsoft YaHei"
         color: "#21be2b"
-        Layout.fillWidth: false
+        Layout.fillWidth: true
       }
     }
     
@@ -141,12 +131,29 @@ Item {
             tagText: tag
             valueText: value
 
+            onTagChanged: {
+              bufferModel.set(index, {"value": valueText, "tag": tagText})
+            }
+
+            onValueChanged: {
+              bufferModel.set(index, {"value": valueText, "tag": tagText})
+              dynItem.updateTotal()
+            }
+
             onRemoveClicked: {
               dynItem.removeBufferBox(index);
             }
           }
         }
       }
+    }
+
+    // ✨ Separator Line
+    Rectangle {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 1
+      color: "#2d2d2d"
+      visible: bufferModel.count > 0
     }
   }
 
@@ -158,5 +165,20 @@ Item {
   function removeBufferBox(index)
   {
     bufferModel.remove(index);
+    updateTotal()
+  }
+
+  function updateTotal()
+  {
+    var sum = 0.0;
+    for(var i = 0; i < bufferModel.count; i++)
+    {
+      var val = parseFloat(bufferModel.get(i).value);
+      if(!isNaN(val))
+      {
+        sum += val;
+      }
+    }
+    total = sum;
   }
 }
