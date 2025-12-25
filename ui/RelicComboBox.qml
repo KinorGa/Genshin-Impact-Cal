@@ -316,4 +316,11 @@ Item {
     { 
       combb.currentIndex=i
     }
+
+    Connections {
+      target: States
+      function onLoadRelicConfig(){
+        box.setIndex(States.getState(box.idx))
+      }
+    }
 }

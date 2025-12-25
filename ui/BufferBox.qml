@@ -50,6 +50,18 @@ Rectangle {
         box.tagText=text
         box.tagChanged()
       }
+
+      onFocusChanged: {
+        if(!focus){
+          box.tagText=text
+          box.tagChanged()
+        }
+      }
+
+      onEditingFinished: {
+        box.tagText=text
+        box.tagChanged()
+      }
     }
 
     Text{
@@ -86,6 +98,18 @@ Rectangle {
       }
 
       onAccepted: {
+        box.valueText=text
+        box.valueChanged()
+      }
+
+      onFocusChanged: {
+        if(!focus){
+          box.valueText=text
+          box.valueChanged()
+        }
+      }
+
+      onEditingFinished: {
         box.valueText=text
         box.valueChanged()
       }

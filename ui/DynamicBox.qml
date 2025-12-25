@@ -29,7 +29,7 @@ Item {
         font.family: "Microsoft YaHei"
         color: "#ffffff"
         Layout.fillWidth: false
-        Layout.preferredWidth: 70
+        Layout.preferredWidth: 100
       }
 
       // Separator
@@ -132,11 +132,11 @@ Item {
             valueText: value
 
             onTagChanged: {
-              bufferModel.set(index, {"value": valueText, "tag": tagText})
+              bufferModel.set(index, { "tag": tagText }) // fix only add tag or value issue
             }
 
             onValueChanged: {
-              bufferModel.set(index, {"value": valueText, "tag": tagText})
+              bufferModel.set(index, { "value": valueText })
               dynItem.updateTotal()
             }
 
@@ -180,5 +180,42 @@ Item {
       }
     }
     total = sum;
+  }
+
+  function addBufferByConfig()
+  {
+    bufferModel.clear()
+    let sz=States.getBufferSize(tagKey);
+    for(let i=0;i<sz;i++)
+    {
+      let buf=States.getBufferData(tagKey,i);
+      addBufferBox([buf.tag, buf.value.toString()]);
+    }
+  }
+
+  // Binding to States.loadBufferConfig (c++ class)
+  Connections {
+    target: States
+    function onLoadBufferConfig(){
+      dynItem.addBufferByConfig()
+    }
+    enabled: true
+  }
+
+  function updateStates()
+  { 
+    States.clearBufferData(tagKey);
+    for(var i=0; i<bufferModel.count; i++)
+    {
+      let buf=bufferModel.get(i);
+      States.updateBufferData(tagKey, buf.tag, parseFloat(buf.value));
+    }
+  }
+
+  Connections {
+    target: States
+    function onUpdateBuffer(){
+      dynItem.updateStates()
+    }
   }
 }

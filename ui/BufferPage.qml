@@ -40,13 +40,13 @@ Item {
 
     ListModel{
       id: elementalAttrModel
-      ListElement { name: "火元素伤害加成"; key: 18 }
-      ListElement { name: "水元素伤害加成"; key: 19 }
-      ListElement { name: "风元素伤害加成"; key: 20 }
-      ListElement { name: "雷元素伤害加成"; key: 21 }
-      ListElement { name: "冰元素伤害加成"; key: 22 }
-      ListElement { name: "岩元素伤害加成"; key: 23 }
-      ListElement { name: "草元素伤害加成"; key: 24 }
+      ListElement { name: "风元素伤害加成"; key: 18 }
+      ListElement { name: "火元素伤害加成"; key: 19 }
+      ListElement { name: "水元素伤害加成"; key: 20 }
+      ListElement { name: "岩元素伤害加成"; key: 21 }
+      ListElement { name: "雷元素伤害加成"; key: 22 }
+      ListElement { name: "草元素伤害加成"; key: 23 }
+      ListElement { name: "冰元素伤害加成"; key: 24 }
     }
 
     ListModel{

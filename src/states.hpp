@@ -15,6 +15,10 @@
 
 #include <QObject>
 #include <QVector>
+#include <QVariant>
+#include <QPair>
+#include <yaml-cpp/yaml.h>
+#include "fstream" // IWYU pragma: keep
 
 using uT = unsigned long long;
 class States: public QObject{
@@ -22,6 +26,9 @@ class States: public QObject{
   // Q_PROPERTY(uT relicState READ relicState WRITE setRelicState NOTIFY relicStateChanged)
 
 public:
+  static const QMap<QString, int> names2i;
+  static const QVector<QString> names;
+
   explicit States(QObject *parent = nullptr);
 
   Q_INVOKABLE uT relicState(int i) const;
@@ -29,8 +36,22 @@ public:
   Q_INVOKABLE uT getState(int i);
   Q_INVOKABLE void restState();
 
+  // Buffer Section
+  Q_INVOKABLE uT getBufferSize(int i) const;
+  Q_INVOKABLE QVariant getBufferData(int i, int j);
+
+  // config
+  Q_INVOKABLE void saveYaml(QString path);
+  Q_INVOKABLE void loadYaml(QString path);
+
+  Q_INVOKABLE void clearBufferData(int i);
+  Q_INVOKABLE void updateBufferData(int i, QString tag, double value);
+
 signals:
   // void relicStateChanged();
+  void loadBufferConfig();
+  void loadRelicConfig();
+  void updateBuffer();
 
 private:
   QVector<uT> MainStates;
@@ -38,6 +59,7 @@ private:
   QVector<uT> MainMasks;
   QVector<uT> SubMasks;
   QVector<uT> states;
+  QVector<QVector<QPair<QString, double>>> buffDatas;
 };
 
 #endif

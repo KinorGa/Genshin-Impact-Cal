@@ -4,6 +4,29 @@
 
 #include "src/states.hpp"
 #include <QDebug>
+
+const QMap<QString, int> States::names2i={
+  {"基础攻击力", 0}, {"额外攻击力", 1}, {"基础生命值", 2}, {"额外生命值", 3}, {"基础防御力", 4},
+  {"额外防御力", 5}, {"攻击力百分比", 6}, {"生命值百分比", 7}, {"防御力百分比", 8}, {"暴击率", 9},
+  {"暴击伤害", 10}, {"元素充能效率", 11}, {"元素精通", 12}, {"反应系数提升", 13},
+  {"攻击倍率", 14}, {"生命倍率", 15}, {"防御倍率", 16}, {"额外倍率", 17},
+  {"风元素伤害加成", 18}, {"火元素伤害加成", 19}, {"水元素伤害加成", 20},
+  {"岩元素伤害加成", 21}, {"雷元素伤害加成", 22}, {"草元素伤害加成", 23},
+  {"冰元素伤害加成", 24}, {"伤害加成", 25}, {"降低防御", 26}, {"无视防御", 27},
+  {"元素抗性", 28}
+};
+
+const QVector<QString> States::names={
+  "基础攻击力", "额外攻击力", "基础生命值", "额外生命值", "基础防御力",
+  "额外防御力", "攻击力百分比", "生命值百分比", "防御力百分比", "暴击率",
+  "暴击伤害", "元素充能效率", "元素精通", "反应系数提升",
+  "攻击倍率", "生命倍率", "防御倍率", "额外倍率",
+  "风元素伤害加成", "火元素伤害加成", "水元素伤害加成",
+  "岩元素伤害加成", "雷元素伤害加成", "草元素伤害加成",
+  "冰元素伤害加成", "伤害加成", "降低防御", "无视防御",
+  "元素抗性"
+};
+
 /*
     0   1   2   3   4   5   6  7  8  9   10    11    12  13    14     15     16
   ATK ATK% HP HP% DEF DEF% CR CD EM ER Anemo Pyro Hydro Geo Electro Dendro Cryo
@@ -20,9 +43,14 @@ States::States(QObject *parent):
     3,2,6,7,8,
     12,3,6,7,8,
     7,2,3,6,8
-  }
+  },
+  buffDatas{29, {}}
 {
   restState();
+  // test buffer add method
+  for(int i=0; i<29; ++i){
+    buffDatas[i].append(qMakePair(QString("Buff %1").arg(i), i*1.5));
+  }
 }
 
 uT States::relicState(int i) const {
@@ -62,4 +90,80 @@ void States::restState(){
     }
     qDebug() << SubStates[i];
   }
+}
+
+uT States::getBufferSize(int i) const {
+  return buffDatas[i].size();
+}
+
+QVariant States::getBufferData(int i, int j){
+  if(i<0||i>=buffDatas.size()||j<0||j>=buffDatas[i].size()){
+    return QVariant();
+  }
+  auto p=buffDatas[i][j];
+  QVariantMap qmap;
+  qmap.insert("tag", p.first);
+  qmap.insert("value", p.second);
+  return QVariant(qmap);
+}
+
+void States::saveYaml(QString path){
+  updateBuffer();
+  YAML::Node root;
+  
+  // save Buffer
+  for(int i=0; i<buffDatas.size(); ++i){
+    for(auto &[name, value]: buffDatas[i]){
+      root["Buffer"][names[i].toStdString()][name.toStdString()]=value;
+    }
+  }
+
+  // save Relic
+  root["Relic"].SetStyle(YAML::EmitterStyle::Flow);
+  for(int i=0; i<states.size(); ++i){
+    root["Relic"].push_back(states[i]);
+  }
+
+  std::ofstream fout(path.toStdString());
+  fout << root;
+  fout.close();
+
+  qDebug() << "YAML file saved successfully!";
+}
+
+void States::loadYaml(QString path){
+  YAML::Node config=YAML::LoadFile(path.toStdString());
+
+  // load Buffer
+    
+  for(const auto &p: config["Buffer"]){
+    QString key=QString::fromStdString(p.first.as<std::string>());
+    int i=names2i[key];
+    buffDatas[i].clear();
+    YAML::Node subnode=p.second;
+    for(const auto &q: subnode){
+      QString tag=QString::fromStdString(q.first.as<std::string>());
+      double value=q.second.as<double>();
+
+      buffDatas[i].append(qMakePair(tag, value));
+    }
+  }
+  
+  loadBufferConfig();
+
+  // load Relic
+  for(int i=0; i<25; ++i){
+    states[i]=config["Relic"][i].as<int>();
+  }
+  loadRelicConfig();
+}
+
+void States::clearBufferData(int i){
+  if(i<0||i>=buffDatas.size()) return;
+  buffDatas[i].clear();
+}
+
+void States::updateBufferData(int i, QString tag, double value){
+  if(i<0||i>=buffDatas.size()) return;
+  buffDatas[i].append(qMakePair(tag, value));
 }

@@ -190,7 +190,7 @@ Item {
     }
 
     Component.onCompleted: {
-      relic.setState()
+      // relic.setState()
     }
   }
   }
