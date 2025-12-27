@@ -186,11 +186,14 @@ Item {
   {
     bufferModel.clear()
     let sz=States.getBufferSize(tagKey);
+    var items = States.getBuffer(tagKey);
     for(let i=0;i<sz;i++)
     {
-      let buf=States.getBufferData(tagKey,i);
-      addBufferBox([buf.tag, buf.value.toString()]);
+      // addBufferBox([buf.tag, buf.value.toString()]);
+      let item={"tag":items[i].tag, "value":items[i].value.toString(), "index": i}; // fixed append methods asynchronous overlay value problems, need to set index here
+      bufferModel.append(item);
     }
+    updateTotalTimer.restart();
   }
 
   // Binding to States.loadBufferConfig (c++ class)
@@ -216,6 +219,17 @@ Item {
     target: States
     function onUpdateBuffer(){
       dynItem.updateStates()
+    }
+  }
+
+  Timer {
+    id: updateTotalTimer
+    interval: 200  // ✅ 10ms delay (you can adjust: 1, 5, 10, 20)
+    running: false
+    repeat: false
+    
+    onTriggered: {
+      dynItem.updateTotal();
     }
   }
 }
