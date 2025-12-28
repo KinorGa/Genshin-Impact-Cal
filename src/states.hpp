@@ -39,6 +39,7 @@ public:
   // Buffer Section
   Q_INVOKABLE uT getBufferSize(int i) const;
   Q_INVOKABLE QVariant getBufferData(int i, int j);
+  Q_INVOKABLE QVariant getBuffer(int i);
 
   // config
   Q_INVOKABLE void saveYaml(QString path);
@@ -47,11 +48,15 @@ public:
   Q_INVOKABLE void clearBufferData(int i);
   Q_INVOKABLE void updateBufferData(int i, QString tag, double value);
 
+  Q_INVOKABLE void test_generate();
+
 signals:
   // void relicStateChanged();
   void loadBufferConfig();
   void loadRelicConfig();
   void updateBuffer();
+
+  void sender(QVector<uT> states, QVector<double> buffers);
 
 private:
   QVector<uT> MainStates;

@@ -47,10 +47,6 @@ States::States(QObject *parent):
   buffDatas{29, {}}
 {
   restState();
-  // test buffer add method
-  for(int i=0; i<29; ++i){
-    buffDatas[i].append(qMakePair(QString("Buff %1").arg(i), i*1.5));
-  }
 }
 
 uT States::relicState(int i) const {
@@ -88,7 +84,7 @@ void States::restState(){
     for(int j=1; j<5; ++j){
       SubStates[i]|=(1<<states[5*i+j]);
     }
-    qDebug() << SubStates[i];
+    // qDebug() << SubStates[i];
   }
 }
 
@@ -105,6 +101,20 @@ QVariant States::getBufferData(int i, int j){
   qmap.insert("tag", p.first);
   qmap.insert("value", p.second);
   return QVariant(qmap);
+}
+
+QVariant States::getBuffer(int i){
+  if(i<0||i>=buffDatas.size()){
+    return QVariant();
+  }
+  QVariantList list;
+  for(auto &[name, value]: buffDatas[i]){
+    QVariantMap qmap;
+    qmap.insert("tag", name);
+    qmap.insert("value", QString::number(value));
+    list.append(QVariant(qmap));
+  }
+  return QVariant(list);
 }
 
 void States::saveYaml(QString path){
@@ -155,6 +165,7 @@ void States::loadYaml(QString path){
   for(int i=0; i<25; ++i){
     states[i]=config["Relic"][i].as<int>();
   }
+  restState();
   loadRelicConfig();
 }
 
@@ -166,4 +177,15 @@ void States::clearBufferData(int i){
 void States::updateBufferData(int i, QString tag, double value){
   if(i<0||i>=buffDatas.size()) return;
   buffDatas[i].append(qMakePair(tag, value));
+}
+
+void States::test_generate(){
+  // cal buffer total;
+  QVector<double> buffer_totals(29, 0.0);
+  for(int i=0; i<buffDatas.size(); ++i){
+    for(auto &[name, value]: buffDatas[i]){
+      buffer_totals[i]+=value;
+    }
+  }
+  emit sender(states, buffer_totals);
 }

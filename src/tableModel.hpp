@@ -6,6 +6,7 @@
 #include <QVector>
 
 const int MAX_COLUMN = 30;
+using uT = unsigned long long;
 
 class GiTableModel: public QAbstractTableModel {
   Q_OBJECT
@@ -21,9 +22,20 @@ public:
   Q_INVOKABLE void filter2();
   Q_INVOKABLE void resetData();
 
+  // sort
+  Q_INVOKABLE void sortByColumn(int column);
+  void applySortFilter(int colIndex, int order);
+
+public slots:
+  void receive_state(QVector<uT> states, QVector<double> buffers);
+
 private:
   QVector<std::array<double, MAX_COLUMN>> m_rawData;
   QVector<int> m_filteredRowIndices;
   QVector<int> m_filteredColIndices;
+  QVector<QString> m_headers;
+
+  QVector<int> m_colOrders;
   int nCol=29;
+  int mRow=0;
 };

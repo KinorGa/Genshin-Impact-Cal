@@ -17,5 +17,6 @@ vT<int> getSubStates(const vT<uT> &states);
 vT<int> getSubIndexs(const vT<uT> &states);
 QVector<std::array<double, GiCal::MAX_COLUMN>> generate(const vT<uT> &states, int m=25);
 QVector<std::array<double, GiCal::MAX_COLUMN>> calculate(const vT<uT> &ori_states, const vT<double> &ori_buffers, int m);
-
+template <typename T>
+int cal_total(int m, vT<int> &conditions);
 #endif
