@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import GiCal.Models 1.0
 
 Item {
   id: dynItem
@@ -10,6 +11,10 @@ Item {
   required property string tagName
   required property int tagKey
   property var total: 0.
+
+  BufferModel{
+    id: bufferModel
+  }
 
   ColumnLayout{
     id: bufferLayout
@@ -66,7 +71,8 @@ Item {
           hoverEnabled: true
 
           onClicked: {
-            dynItem.addBufferBox(["", ""])
+            // dynItem.addBufferBox(["", ""])
+            bufferModel.addBuffer("", 0.0)
           }
 
           onEntered: {
@@ -94,7 +100,8 @@ Item {
 
       // Right: Total count
       Text {
-        text: "Total: " + dynItem.total.toFixed(2)
+        // text: "Total: " + dynItem.total.toFixed(2)
+        text: "Total: "+bufferModel.total.toFixed(2)
         font.pixelSize: 12
         font.bold: true
         font.family: "Microsoft YaHei"
@@ -119,29 +126,39 @@ Item {
 
         Repeater{
           id: repeater
-          model: ListModel{
-            id: bufferModel
-          }
+          model: bufferModel
 
           delegate: BufferBox{
-            required property string tag
-            required property string value
-            required property int index
+            // required property string tag
+            // required property string value
+            // required property int index
             
-            tagText: tag
-            valueText: value
+            // tagText: tag
+            // valueText: value
 
-            onTagChanged: {
-              bufferModel.set(index, { "tag": tagText }) // fix only add tag or value issue
-            }
+            // onTagChanged: {
+            //   bufferModel.set(index, { "tag": tagText }) // fix only add tag or value issue
+            // }
 
-            onValueChanged: {
-              bufferModel.set(index, { "value": valueText })
-              dynItem.updateTotal()
-            }
+            // onValueChanged: {
+            //   bufferModel.set(index, { "value": valueText })
+            //   dynItem.updateTotal()
+            // }
 
-            onRemoveClicked: {
-              dynItem.removeBufferBox(index);
+            // onRemoveClicked: {
+            //   dynItem.removeBufferBox(index);
+            // }
+
+            required property int index
+            required property var modelData
+            required property var model
+            tagText: modelData.tag
+            valueText: modelData.value
+
+            onTagChanged: model.tag = tagText
+            onValueChanged: model.value = valueText
+            onRemoveClicked:{
+              bufferModel.removeBuffer(index);
             }
           }
         }
@@ -157,43 +174,40 @@ Item {
     }
   }
 
-  function addBufferBox(args)
-  {
-    bufferModel.append({"tag": args[0], "value": args[1]});
-  }
+  // function addBufferBox(args)
+  // {
+  //   bufferModel.append({"tag": args[0], "value": args[1]});
+  // }
 
-  function removeBufferBox(index)
-  {
-    bufferModel.remove(index);
-    updateTotal()
-  }
+  // function removeBufferBox(index)
+  // {
+  //   bufferModel.remove(index);
+  //   updateTotal()
+  // }
 
-  function updateTotal()
-  {
-    var sum = 0.0;
-    for(var i = 0; i < bufferModel.count; i++)
-    {
-      var val = parseFloat(bufferModel.get(i).value);
-      if(!isNaN(val))
-      {
-        sum += val;
-      }
-    }
-    total = sum;
-  }
+  // function updateTotal()
+  // {
+  //   var sum = 0.0;
+  //   for(var i = 0; i < bufferModel.count; i++)
+  //   {
+  //     var val = parseFloat(bufferModel.get(i).value);
+  //     if(!isNaN(val))
+  //     {
+  //       sum += val;
+  //     }
+  //   }
+  //   total = sum;
+  // }
 
   function addBufferByConfig()
   {
-    bufferModel.clear()
-    let sz=States.getBufferSize(tagKey);
-    var items = States.getBuffer(tagKey);
-    for(let i=0;i<sz;i++)
+    bufferModel.clearBuffer();
+    const itemsFromState = States.getBuffer(tagKey);
+
+    for(let i = 0; i < itemsFromState.length; i++)
     {
-      // addBufferBox([buf.tag, buf.value.toString()]);
-      let item={"tag":items[i].tag, "value":items[i].value.toString(), "index": i}; // fixed append methods asynchronous overlay value problems, need to set index here
-      bufferModel.append(item);
+      bufferModel.addBuffer(itemsFromState[i].tag, itemsFromState[i].value.toString());
     }
-    updateTotalTimer.restart();
   }
 
   // Binding to States.loadBufferConfig (c++ class)
@@ -207,11 +221,21 @@ Item {
 
   function updateStates()
   { 
+    // States.clearBufferData(tagKey);
+    // for(var i=0; i<bufferModel.count; i++)
+    // {
+    //   let buf=bufferModel.get(i);
+    //   States.updateBufferData(tagKey, buf.tag, parseFloat(buf.value));
+    // }
+
     States.clearBufferData(tagKey);
     for(var i=0; i<bufferModel.count; i++)
     {
-      let buf=bufferModel.get(i);
-      States.updateBufferData(tagKey, buf.tag, parseFloat(buf.value));
+      // To get data, we must create a temporary index.
+      let modelIndex = bufferModel.index(i, 0);
+      let tag = bufferModel.data(modelIndex, BufferModel.TagRole);
+      let valStr = bufferModel.data(modelIndex, BufferModel.ValueRole);
+      States.updateBufferData(tagKey, tag, parseFloat(valStr));
     }
   }
 
