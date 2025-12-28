@@ -250,6 +250,16 @@ Item {
                     filterPopup.open();
                 }
             }
+
+            ToolSeparator{}
+
+            ToolButton{
+              text: "test generate"
+              height: parent.height
+              onClicked:{
+                States.test_generate()
+              }
+            }
         }
     }
 
@@ -260,7 +270,7 @@ Item {
         anchors.right: parent.right
         // width: 500
         // height: 600
-        anchors.margins: 10
+        anchors.margins: 0
         color: "white"
         border.color: "#ddd"
         border.width: 1
@@ -286,7 +296,8 @@ Item {
                 // implicitWidth: columnModel.get(index).visible ? 100 : 0
                 implicitHeight: 40
                 implicitWidth: 100
-                color: mouseArea.containsMouse ? "#444444" : "#333333"
+                // color: mouseArea.containsMouse ? "#444444" : "#333333"
+                color: "#333333"
                 border.color: "#555555"
                 border.width: 1
 
@@ -299,15 +310,18 @@ Item {
                     font.pixelSize: 12
                 }
 
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        console.log("Header clicked: column", index);
+                TapHandler {
+                    onTapped: {
+                        console.log("Header tapped: column", index);
                         // giTableModel.sortByColumn(index);
+                        giTableModel.sortByColumn(index);
+                    }
+                }
+
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: {
+                        console.log("Header right-tapped: column", index);
                     }
                 }
             }
@@ -317,10 +331,11 @@ Item {
         VerticalHeaderView {
             id: verticalHeader
             anchors.left: parent.left
-            anchors.right: horizontalHeader.left
+            // anchors.right: horizontalHeader.left
             anchors.top: horizontalHeader.bottom
             syncView: tableView
             clip: true
+            width: 60
             // implicitWidth: 60
         }
 
@@ -352,7 +367,7 @@ Item {
                     required property int column
                     required property var display
 
-                    implicitWidth: 100
+                    implicitWidth: 120
                     implicitHeight: 35
                     border.width: 1
                     border.color: "#ddd"
