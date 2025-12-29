@@ -7,6 +7,7 @@ ToolBar{
   id: menuBar
   width: parent.width
   height: 50
+  property alias nextPageBtn: nextPageBtn
 
   RowLayout{
     anchors.fill: parent
@@ -16,8 +17,8 @@ ToolBar{
       icon.source: "qrc:/Images/assets/icons/folder_open.png"
       width: 40
       onClicked:{
-        // States.loadYaml("D:/QtProject/GiCal/test2_output.yaml")
-        fileDialog.open()
+        States.loadYaml("D:/QtProject/GiCal/test2_output.yaml")
+        // fileDialog.open()
       }
     }
 
@@ -44,11 +45,18 @@ ToolBar{
 
     ToolSeparator{}
 
+    ToolButton{
+      id: nextPageBtn
+      text: ">"
+      width: 40
+    }
+
     Item{Layout.fillWidth: true}
   }
 
   FileDialog {
     id: fileDialog
+    nameFilters: ["YAML files (*.yaml)"]
     currentFolder: {
       var parentDir = Qt.resolvedUrl("../")
       console.log(parentDir)

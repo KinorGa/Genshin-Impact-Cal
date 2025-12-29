@@ -5,6 +5,7 @@ import QtQuick.Layouts
 Item {
     width: parent.width
     height: parent.height
+    property alias prevPageBtn: prevPageBtn
     Popup {
         id: filterPopup
         width: 600
@@ -27,177 +28,18 @@ Item {
                 spacing: 10
 
                 Repeater {
-                    model: ListModel {
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                        ListElement {
-                            value: "option1"
-                        }
-                        ListElement {
-                            value: "option2"
-                        }
-                        ListElement {
-                            value: "option3"
-                        }
-                        ListElement {
-                            value: "option4"
-                        }
-                        ListElement {
-                            value: "option5"
-                        }
-                        ListElement {
-                            value: "option6"
-                        }
-                        ListElement {
-                            value: "option7"
-                        }
-                        ListElement {
-                            value: "option8"
-                        }
-                        ListElement {
-                            value: "option9"
-                        }
-                    }
+                    model: columnModel
                     delegate: CheckBox {
-                        required property string value
-                        text: value
-                        checked: true
-                        width: 100
-                        onCheckedChanged: {
+                        required property string name
+                        required property bool show
+                        required property var model
+                        text: name
+                        checked: show // TOTO
+                        width: 150
+                        onClicked: {
+                            console.log("check")
                             // giTableModel.updateFilterSelection(modelData, checked)
+                            model.show=checked
                         }
                     }
                 }
@@ -234,7 +76,7 @@ Item {
             ToolSeparator {}
 
             ToolButton {
-                text: "clear filter"
+                text: "reset"
                 height: parent.height
                 onClicked: {
                     giTableModel.resetData();
@@ -254,11 +96,25 @@ Item {
             ToolSeparator{}
 
             ToolButton{
-              text: "test generate"
+              text: "recal"
               height: parent.height
               onClicked:{
                 States.test_generate()
               }
+            }
+
+            ToolSeparator{}
+
+            ToolButton{
+              text: "<"
+              id: prevPageBtn
+            }
+
+            ToolSeparator{}
+
+            ToolButton{
+              id: nextPageBtn
+              text: ">"
             }
         }
     }
@@ -304,7 +160,7 @@ Item {
                 Text {
                     id: headerText
                     anchors.centerIn: parent
-                    text: giTableModel.headerData(index, Qt.Horizontal, 0)
+                    text: giTableModel.headerData(parent.index, Qt.Horizontal, 0)
                     color: "white"
                     font.bold: true
                     font.pixelSize: 12
@@ -312,16 +168,16 @@ Item {
 
                 TapHandler {
                     onTapped: {
-                        console.log("Header tapped: column", index);
+                        console.log("Header tapped: column", parent.index);
                         // giTableModel.sortByColumn(index);
-                        giTableModel.sortByColumn(index);
+                        giTableModel.sortByColumn(parent.index);
                     }
                 }
 
                 TapHandler {
                     acceptedButtons: Qt.RightButton
                     onTapped: {
-                        console.log("Header right-tapped: column", index);
+                        console.log("Header right-tapped: column", parent.index);
                     }
                 }
             }
@@ -337,6 +193,25 @@ Item {
             clip: true
             width: 60
             // implicitWidth: 60
+
+            delegate: Rectangle{
+              required property int index
+              required property int modelData
+
+              implicitWidth: 60
+              implicitHeight: 35
+              border.width: 1
+              border.color: "#ddd"
+              color: "#333333"
+
+              Text {
+                  anchors.centerIn: parent
+                  text: giTableModel.headerData(parent.index, Qt.Vertical, 0)
+                  color: "white"
+                  font.bold: true
+                  font.pixelSize: 12
+              }
+            }
         }
 
         // ✅ Data table with columnWidthProvider
@@ -362,6 +237,19 @@ Item {
                 rowSpacing: 1
                 interactive: true
 
+                // ========== 新增1：打印模型列数/行数，定位QML侧认知的列数 ==========
+                Component.onCompleted: {
+                    console.log("[QML] 模型列数:", giTableModel.columnCount())
+                    console.log("[QML] 模型行数:", giTableModel.rowCount())
+                    console.log("[QML] TableView列数:", tableView.columns)
+                }
+
+                // ========== 新增2：监控列数变化，定位异常列数来源 ==========
+                onColumnsChanged: {
+                    console.warn("[QML] TableView列数变化为:", tableView.columns)
+                }
+
+
                 delegate: Rectangle {
                     required property int row
                     required property int column
@@ -376,7 +264,11 @@ Item {
                     Text {
                         id: st
                         anchors.centerIn: parent
-                        text: display
+                        text: {
+                          if(parent.display === undefined || parent.display === null){
+                            console.log("undefined data at row "+parent.row+" column "+parent.column)
+                          }return parent.display
+                        }
                         font.pixelSize: 12
                         elide: Text.ElideRight
                     }
