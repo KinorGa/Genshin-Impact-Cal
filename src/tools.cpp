@@ -108,6 +108,13 @@ QVector<std::array<double, GiCal::MAX_COLUMN>> calculate(const vT<uT> &ori_state
   std::array<double, BUFFER_SIZE> buffer_template;
   std::copy(buffers.begin(), buffers.end(), buffer_template.begin());
   
+
+  /*
+    由于副词条数量的变动，导致可变buffer的集合为
+      final ATK, ATK%, final HP, HP%, final DEF, DEF%, EM, ER, CR, CD, dmg dealt
+    可统计的量有
+      final dmg // TODO
+  */
   std::for_each(
     std::execution::par,          
     data.begin(), data.end(),    
@@ -138,24 +145,25 @@ QVector<std::array<double, GiCal::MAX_COLUMN>> calculate(const vT<uT> &ori_state
         row[nstats+8] = buffer_copy[9]/100.;
         row[nstats+9] = buffer_copy[10]/100.;
 
-        // dmg delta
+        // dmg dealt
         row[nstats+10] = buffer_copy[25]/100.;
 
+        // do not display
         // def multiplier
-        row[nstats+11] = (lv1+100)/(lv1+100+(lv2+100)*(1-buffer_copy[26]/100.)*(1-buffer_copy[27]/100.));
+        double def_multiplier = (lv1+100)/(lv1+100+(lv2+100)*(1-buffer_copy[26]/100.)*(1-buffer_copy[27]/100.));
 
         // react multiplier
-        row[nstats+12] = 
+        double react_multiplier = 
           buffer_copy[28]<0. ? (1-buffer_copy[28]/200.) : (buffer_copy[28]<=75. ? 1-buffer_copy[28]/100. : (1/(1+buffer_copy[28]/25.)));
 
         // final dmg
-        row[nstats+13] = 
+        row[nstats+11] = 
           (row[nstats]*buffer_copy[14]/100.+row[nstats+1]*buffer_copy[15]/100.+row[nstats+2]*buffer_copy[16]/100.+buffer_copy[17])*
           (1+row[nstats+9])*
           (1+buffer_copy[13]/100.+2.78*row[nstats+6]/(1400+row[nstats+6]))*
           (1+row[nstats+10])*
-          row[nstats+11]*
-          row[nstats+12]*2;
+          def_multiplier*
+          react_multiplier*2;
         }
     );
   qDebug() << "calculation function took" << timer.elapsed() << "ms";

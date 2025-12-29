@@ -4,8 +4,9 @@
 
 #include <QAbstractTableModel>
 #include <QVector>
+#include "src/constants.hpp"
 
-const int MAX_COLUMN = 30;
+using GiCal::MAX_COLUMN;
 using uT = unsigned long long;
 
 class GiTableModel: public QAbstractTableModel {
@@ -25,9 +26,17 @@ public:
   // sort
   Q_INVOKABLE void sortByColumn(int column);
   void applySortFilter(int colIndex, int order);
+  Q_INVOKABLE void filterByInterval(int column, double minValue, double maxValue);
+  void updateHeader(QVector<uT> states);
 
 public slots:
   void receive_state(QVector<uT> states, QVector<double> buffers);
+  void receive_columns(QVector<int> visibleColumns);
+
+signals:
+  void sender_headers(QVector<QString> headers);
+  void sender_columns(QVector<int> visibleColumns);
+  
 
 private:
   QVector<std::array<double, MAX_COLUMN>> m_rawData;
@@ -36,6 +45,8 @@ private:
   QVector<QString> m_headers;
 
   QVector<int> m_colOrders;
-  int nCol=29;
+  int mCol=MAX_COLUMN;
   int mRow=0;
+
+  int nstat=0;
 };
