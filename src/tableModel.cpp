@@ -65,10 +65,15 @@ QVariant GiTableModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
   }
   if (orientation == Qt::Horizontal) {
-    switch (m_colOrders[section]%3) {
-      case 2:
-        return m_headers[m_filteredColIndices[section]] + " ↑";
+    /*
+      当前状态为0时默认未排序，也即前面状态2转为0，也就是order=2时，按索引排序
+      当前状态为1时升序，也即前面状态0转为1，也就是order=0时升序
+      当前状态为2时降序，也即前面状态1转为2，也就是order=1时降序
+    */
+    switch (m_colOrders[m_filteredColIndices[section]]%3) {
       case 1:
+        return m_headers[m_filteredColIndices[section]] + " ↑";
+      case 2:
         return m_headers[m_filteredColIndices[section]] + " ↓";
       case 0:
         return m_headers[m_filteredColIndices[section]];
@@ -188,7 +193,10 @@ void GiTableModel::receive_state(QVector<uT> states, QVector<double> buffers){
       m_filteredRowIndices = std::move(newFilteredRowIndices);
       QFuture<void> released=QtConcurrent::run([oldData = std::move(oldRawData), oldRawI=std::move(oldRowIndices)]() mutable {});
       qDebug() << "Data assignment took" << timer.elapsed() << "ms";
-    
+      
+      for(auto &c: m_colOrders){
+        c=0;
+      }
       endResetModel();
     }, Qt::QueuedConnection);
   });
@@ -220,7 +228,7 @@ void GiTableModel::sortByColumn(int column){
     else{
       std::sort(std::execution::par, newFilteredRowIndices.begin(), newFilteredRowIndices.end(), [this, colIndex, order](int a, int b) -> bool {
         bool cmp = m_rawData[a][colIndex] < m_rawData[b][colIndex];
-        return order % 2 == 0 ? cmp : !cmp;
+        return order % 2 != 0 ? cmp : !cmp;
       });
     }
     qDebug() << "Sorting took" << timer.elapsed() << "ms";
@@ -228,7 +236,12 @@ void GiTableModel::sortByColumn(int column){
     QMetaObject::invokeMethod(this, [this, newFilteredRowIndices=std::move(newFilteredRowIndices), colIndex]() {
       beginResetModel();
       m_filteredRowIndices = std::move(newFilteredRowIndices);
-      m_colOrders[colIndex] += 1;
+      m_colOrders[colIndex] = (m_colOrders[colIndex] + 1) % 3;
+      for(int c=0; c<m_colOrders.size(); ++c){
+        if(c!=colIndex){
+          m_colOrders[c]=0;
+        }
+      }
       endResetModel();
       qDebug() << "Sort applied on UI thread.";
     }, Qt::QueuedConnection);
@@ -247,7 +260,6 @@ void GiTableModel::applySortFilter(int colIndex, int order){
       return order % 2 == 0 ? cmp : !cmp;
     });
   }
-  m_colOrders[colIndex] += 1;
   qDebug() << "Sorting took" << timer.elapsed() << "ms";
 }
 

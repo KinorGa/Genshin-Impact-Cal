@@ -160,7 +160,20 @@ void States::saveYaml(QString path){
 }
 
 void States::loadYaml(QString path){
-  YAML::Node config=YAML::LoadFile(path.toStdString());
+
+  QFile file(path);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Failed to open YAML file:" << file.errorString();
+    return;
+  }
+
+  QTextStream in(&file);
+  QString yamlContent = in.readAll();
+  file.close();
+
+  std::string yamlStr = yamlContent.toUtf8().toStdString();
+  YAML::Node config = YAML::Load(yamlStr); 
+  // YAML::Node config=YAML::LoadFile(path.toStdString());
 
   // load Buffer
     
