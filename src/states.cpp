@@ -4,6 +4,8 @@
 
 #include "src/states.hpp"
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
 
 const QMap<QString, int> States::names2i={
   {"基础攻击力", 0}, {"额外攻击力", 1}, {"基础生命值", 2}, {"额外生命值", 3}, {"基础防御力", 4},
@@ -140,10 +142,20 @@ void States::saveYaml(QString path){
     root["Relic"].push_back(states[i]);
   }
 
-  std::ofstream fout(path.toStdString());
-  fout << root;
-  fout.close();
+  // std::ofstream fout(path.toStdString());
+  // fout << root;
+  // fout.close();
+  
+  QFile file(path);
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+    qDebug() << "Failed to open file for writing:" << file.errorString();
+    return;
+  }
+  QTextStream out(&file);
+  std::string yamlContent=YAML::Dump(root);
+  out << QString::fromStdString(yamlContent);
 
+  file.close();
   qDebug() << "YAML file saved successfully!";
 }
 
