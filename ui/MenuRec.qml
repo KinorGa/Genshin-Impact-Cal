@@ -17,8 +17,8 @@ ToolBar{
       icon.source: "qrc:/Images/assets/icons/folder_open.png"
       width: 40
       onClicked:{
-        States.loadYaml("D:/QtProject/GiCal/test2_output.yaml")
-        // fileDialog.open()
+        // States.loadYaml("D:/QtProject/GiCal/test2_output.yaml")
+        fileDialog.open()
       }
     }
 
@@ -28,7 +28,7 @@ ToolBar{
       text: "💾"
       width: 40
       onClicked:{
-        States.saveYaml("D:/QtProject/GiCal/test2_output.yaml")
+        saveDialog.open()
       }
     }
 
@@ -38,8 +38,9 @@ ToolBar{
       text: "📤"
       width: 200
       onClicked:{
-        States.loadBufferConfig()
-        States.loadRelicConfig()
+        // States.loadBufferConfig()
+        // States.loadRelicConfig()
+        States.loadYaml("D:/QtProject/GiCal/test2_output.yaml")
       }
     }
 
@@ -57,14 +58,32 @@ ToolBar{
   FileDialog {
     id: fileDialog
     nameFilters: ["YAML files (*.yaml)"]
+    currentFolder: parentDir
+    // onAccepted: image.source = selectedFile
+    onAccepted: {
+      let file_path=selectedFile.toString()
+      if(file_path.startsWith("file:///")){
+          file_path = file_path.substring(8)
+      }
+      States.loadYaml(file_path)
+    }
+  }
+
+  FileDialog {
+    id: saveDialog
+    nameFilters: ["YAML files (*.yaml)"]
     currentFolder: {
       var parentDir = Qt.resolvedUrl("../")
       console.log(parentDir)
       return parentDir;
     }
-    // onAccepted: image.source = selectedFile
+    fileMode: FileDialog.SaveFile
     onAccepted: {
-      console.log(selectedFile)
+      let file_path=selectedFile.toString()
+      if (file_path.startsWith("file:///")) {
+          file_path = file_path.substring(8)
+      }
+      States.saveYaml(file_path)
     }
   }
 }

@@ -14,6 +14,15 @@ Item {
 
   BufferModel{
     id: bufferModel
+    tagKey: dynItem.tagKey
+  }
+
+  // 绑定当前model实例到States (C++ to C++)
+  Connections{
+    target: bufferModel
+    function onSenderBuffer(tagKey, data){
+      States.receiveBuffer(tagKey, data);
+    }
   }
 
   ColumnLayout{
@@ -129,25 +138,6 @@ Item {
           model: bufferModel
 
           delegate: BufferBox{
-            // required property string tag
-            // required property string value
-            // required property int index
-            
-            // tagText: tag
-            // valueText: value
-
-            // onTagChanged: {
-            //   bufferModel.set(index, { "tag": tagText }) // fix only add tag or value issue
-            // }
-
-            // onValueChanged: {
-            //   bufferModel.set(index, { "value": valueText })
-            //   dynItem.updateTotal()
-            // }
-
-            // onRemoveClicked: {
-            //   dynItem.removeBufferBox(index);
-            // }
 
             required property int index
             required property var modelData
@@ -170,34 +160,9 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: 1
       color: "#2d2d2d"
-      visible: bufferModel.count > 0
+      visible: bufferModel.rowCount() > 0
     }
   }
-
-  // function addBufferBox(args)
-  // {
-  //   bufferModel.append({"tag": args[0], "value": args[1]});
-  // }
-
-  // function removeBufferBox(index)
-  // {
-  //   bufferModel.remove(index);
-  //   updateTotal()
-  // }
-
-  // function updateTotal()
-  // {
-  //   var sum = 0.0;
-  //   for(var i = 0; i < bufferModel.count; i++)
-  //   {
-  //     var val = parseFloat(bufferModel.get(i).value);
-  //     if(!isNaN(val))
-  //     {
-  //       sum += val;
-  //     }
-  //   }
-  //   total = sum;
-  // }
 
   function addBufferByConfig()
   {
@@ -221,39 +186,13 @@ Item {
 
   function updateStates()
   { 
-    // States.clearBufferData(tagKey);
-    // for(var i=0; i<bufferModel.count; i++)
-    // {
-    //   let buf=bufferModel.get(i);
-    //   States.updateBufferData(tagKey, buf.tag, parseFloat(buf.value));
-    // }
-
-    States.clearBufferData(tagKey);
-    for(var i=0; i<bufferModel.count; i++)
-    {
-      // To get data, we must create a temporary index.
-      let modelIndex = bufferModel.index(i, 0);
-      let tag = bufferModel.data(modelIndex, BufferModel.TagRole);
-      let valStr = bufferModel.data(modelIndex, BufferModel.ValueRole);
-      States.updateBufferData(tagKey, tag, parseFloat(valStr));
-    }
+    bufferModel.sender_buffer_()
   }
 
   Connections {
     target: States
     function onUpdateBuffer(){
       dynItem.updateStates()
-    }
-  }
-
-  Timer {
-    id: updateTotalTimer
-    interval: 200  // ✅ 10ms delay (you can adjust: 1, 5, 10, 20)
-    running: false
-    repeat: false
-    
-    onTriggered: {
-      dynItem.updateTotal();
     }
   }
 }

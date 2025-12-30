@@ -58,6 +58,9 @@ signals:
 
   void sender(QVector<uT> states, QVector<double> buffers);
 
+public slots:
+  void receiveBuffer(int tagKey, QVector<QPair<QString, double>>data);
+
 private:
   QVector<uT> MainStates;
   QVector<uT> SubStates;

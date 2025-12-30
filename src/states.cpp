@@ -118,7 +118,13 @@ QVariant States::getBuffer(int i){
 }
 
 void States::saveYaml(QString path){
+  qDebug() << "Saving YAML file to " << path;
+  if(path.isEmpty()){
+    qDebug() << "Invalid path!";
+    return;
+  }
   updateBuffer();
+  qDebug() << buffDatas;
   YAML::Node root;
   
   // save Buffer
@@ -127,7 +133,7 @@ void States::saveYaml(QString path){
       root["Buffer"][names[i].toStdString()][name.toStdString()]=value;
     }
   }
-
+  qDebug() << buffDatas;
   // save Relic
   root["Relic"].SetStyle(YAML::EmitterStyle::Flow);
   for(int i=0; i<states.size(); ++i){
@@ -158,6 +164,7 @@ void States::loadYaml(QString path){
       buffDatas[i].append(qMakePair(tag, value));
     }
   }
+  qDebug() << buffDatas;
   
   loadBufferConfig();
 
@@ -181,6 +188,7 @@ void States::updateBufferData(int i, QString tag, double value){
 
 void States::test_generate(){
   // cal buffer total;
+  emit updateBuffer();
   QVector<double> buffer_totals(29, 0.0);
   for(int i=0; i<buffDatas.size(); ++i){
     for(auto &[name, value]: buffDatas[i]){
@@ -188,4 +196,9 @@ void States::test_generate(){
     }
   }
   emit sender(states, buffer_totals);
+}
+
+void States::receiveBuffer(int tagKey, QVector<QPair<QString, double>>data){
+  if(tagKey<0||tagKey>=buffDatas.size()) return;
+  buffDatas[tagKey]=data;
 }

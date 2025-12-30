@@ -17,6 +17,7 @@ struct BufferItem{
 class BufferModel : public QAbstractListModel {
   Q_OBJECT
   Q_PROPERTY(double total READ total NOTIFY totalChanged)
+  Q_PROPERTY(int tagKey READ tagKey WRITE setTagKey)
 public:
   explicit BufferModel(QObject *parent = nullptr);
 
@@ -35,6 +36,11 @@ public:
   
   double total() const;
 
+  int tagKey() const { return m_tagKey; }
+  void setTagKey(int key) { m_tagKey = key; }
+
+  Q_INVOKABLE void sender_buffer_();
+
 public slots:
   void addBuffer(const QString &tag, double value);
   void removeBuffer(int index);
@@ -42,11 +48,12 @@ public slots:
 
 signals:
     void totalChanged();
-
+    void senderBuffer(int tagKey, QVector<QPair<QString, double>> data);
 private:  
     void updateTotal();
     QList<BufferItem> m_items;
     double m_total = 0.0;
+    int m_tagKey = -1;
 };
 
 #endif // BUFFER_MODEL_HPP

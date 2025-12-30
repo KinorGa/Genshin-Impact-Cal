@@ -54,7 +54,7 @@ QVariant GiTableModel::data(const QModelIndex &index, int role) const {
     qDebug() << "Null or empty data at row " << row << ", col " << col;
     qDebug() << m_filteredColIndices;
   }
-  if(col>=nstat){
+  if(m_filteredColIndices[col]>=nstat){ 
     return QString::number(res.toDouble(), 'f', 4);
   }
   return QString::number(res.toDouble(), 'f', 0);

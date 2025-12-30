@@ -88,3 +88,11 @@ void BufferModel::updateTotal() {
     emit totalChanged();
   }
 }
+
+void BufferModel::sender_buffer_() {
+  QVector<QPair<QString, double>> data;
+  for(const BufferItem &item : std::as_const(m_items)) {
+    data.append(qMakePair(item.tag, item.value));
+  }
+  emit senderBuffer(m_tagKey, data);
+}
