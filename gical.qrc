@@ -1,0 +1,23 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/Images">
+    <file>assets/icons/ATK%.png</file>
+    <file>assets/icons/ATK.png</file>
+    <file>assets/icons/CD.png</file>
+    <file>assets/icons/CR.png</file>
+    <file>assets/icons/DEF%.png</file>
+    <file>assets/icons/EM.png</file>
+    <file>assets/icons/ER.png</file>
+    <file>assets/icons/HP%.png</file>
+    <file>assets/icons/HP.png</file>
+    <file>assets/icons/DEF.png</file>
+    <file>assets/icons/Anemo.png</file>
+    <file>assets/icons/Dendro.png</file>
+    <file>assets/icons/Electro.png</file>
+    <file>assets/icons/Geo.png</file>
+    <file>assets/icons/Pyro.png</file>
+    <file>assets/icons/Hydro.png</file>
+    <file>assets/icons/Cryo.png</file>
+    <file>assets/icons/folder_open.png</file>
+  </qresource>
+</RCC>
